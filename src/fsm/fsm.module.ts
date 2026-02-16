@@ -4,6 +4,7 @@ import { FsmService } from './fsm.service';
 import { ConversationHelperService } from './conversation-helper.service';
 import { Conversation } from '../entities/conversation.entity';
 import { Message } from '../entities/message.entity';
+import { ServicesModule } from '../services/services.module';
 
 // Export FSM engine and handlers for use in services
 export * from './engine';
@@ -16,7 +17,10 @@ export * from './llm-utils';
 export * from './llm-utils-v2';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Conversation, Message])],
+  imports: [
+    TypeOrmModule.forFeature([Conversation, Message]),
+    ServicesModule,
+  ],
   providers: [FsmService, ConversationHelperService],
   exports: [FsmService, ConversationHelperService],
 })

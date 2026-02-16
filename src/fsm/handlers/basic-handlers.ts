@@ -177,13 +177,26 @@ export class CollectingPhoneStateHandler extends BaseStateHandler {
       };
     }
 
-    const phone = await extractTextField(
+    let phone = await extractTextField(
       "phone",
-      "o número de telefone com DDD",
+      "o número de telefone brasileiro com DDD (aceita tanto números antigos com 8 dígitos quanto novos com 9 dígitos após o DDD). Exemplos válidos: 4896949571 (10 dígitos), 48996949571 (11 dígitos), (48) 9694-9571, etc.",
       userMessage,
     );
 
+    console.log(`[CollectingPhone] Extracted phone via LLM: "${phone}" from message: "${userMessage}"`);
+
+    if (!phone || !isValidPhone(phone)) {
+      const numbersOnly = userMessage.replace(/\D/g, "");
+      console.log(`[CollectingPhone] LLM extraction failed, trying direct number extraction: "${numbersOnly}"`);
+      
+      if (numbersOnly.length >= 10 && numbersOnly.length <= 11) {
+        phone = numbersOnly;
+        console.log(`[CollectingPhone] Using direct extraction: "${phone}"`);
+      }
+    }
+    
     if (phone && isValidPhone(phone)) {
+      console.log(`[CollectingPhone] Phone validated successfully: ${phone}`);
       const formattedPhone = formatPhone(phone);
       const { customerName, customerEmail, leadId: existingLeadId } = conversation.context;
 
@@ -264,8 +277,9 @@ export class CollectingPhoneStateHandler extends BaseStateHandler {
     }
 
     // Failed to extract or validate phone
+    console.log(`[CollectingPhone] Failed to extract or validate phone. Extracted: "${phone}", Message: "${userMessage}"`);
     return {
-      response: "Não consegui identificar um telefone válido. Poderia informar novamente com o DDD? (Ex: 11987654321 ou (11) 98765-4321)",
+      response: "Não consegui identificar um telefone válido. Poderia informar novamente com o DDD? Aceito números com 8 ou 9 dígitos após o DDD. Exemplos: 4896949571 (10 dígitos) ou 48996949571 (11 dígitos) ou (48) 9694-9571",
       newContext: this.stayInState(conversation.context),
     };
   }

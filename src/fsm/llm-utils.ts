@@ -73,6 +73,12 @@ export async function extractTextField(
   userMessage: string,
   validationRegex?: RegExp,
 ): Promise<string | null> {
+  // Adicionar exemplos específicos para telefone
+  const phoneExamples = fieldName === "phone" ? `
+- Para telefones: aceite números com DDD + 8 dígitos (formato antigo) OU DDD + 9 dígitos (formato novo)
+- Exemplos válidos: "4896949571" (10 dígitos), "48996949571" (11 dígitos), "(48) 9694-9571", "48 9694 9571", etc.
+- Extraia APENAS os números, mesmo que venham com formatação` : "";
+
   const systemPrompt = `Você é um assistente que extrai informações de mensagens.
 Sua tarefa é extrair ${fieldDescription} da mensagem do usuário.
 
@@ -80,7 +86,7 @@ IMPORTANTE:
 - Se a mensagem contém ${fieldDescription}, extraia-o exatamente como foi escrito
 - Aceite nomes simples, compostos, apelidos - qualquer texto que pareça ser ${fieldDescription}
 - Se realmente não houver ${fieldDescription} na mensagem, retorne null
-- Para nomes: aceite qualquer palavra que pareça ser um nome próprio
+- Para nomes: aceite qualquer palavra que pareça ser um nome próprio${phoneExamples}
 
 Exemplos para nomes:
 - "victor" → {"name": "Victor"}
