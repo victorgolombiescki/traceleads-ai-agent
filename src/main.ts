@@ -13,43 +13,16 @@ async function bootstrap() {
     });
     
     const frontendUrl = process.env.FRONTEND_URL || 'https://app.traceleads.com.br';
-    const allowedOrigins = frontendUrl.split(',').map(url => url.trim()).filter(Boolean);
-    
-    if (!allowedOrigins.includes('https://app.traceleads.com.br')) {
-      allowedOrigins.push('https://app.traceleads.com.br');
-    }
+    const allowedOrigins = [frontendUrl, 'https://app.traceleads.com.br'];
     
     app.enableCors({
       origin: (origin, callback) => {
-        if (!origin) {
-          return callback(null, true);
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          // Sempre permitir (mesmo padrão do traceleads-api)
+          callback(null, true);
         }
-        
-        // Verificar se a origin está permitida (comparação exata ou por hostname)
-        const isAllowed = allowedOrigins.some(allowed => {
-          if (origin === allowed) return true;
-          // Comparar hostnames (ignorar protocolo e porta)
-          try {
-            const originUrl = new URL(origin);
-            const allowedUrl = new URL(allowed);
-            return originUrl.hostname === allowedUrl.hostname;
-          } catch {
-            return origin.startsWith(allowed);
-          }
-        });
-        
-        if (isAllowed) {
-          return callback(null, true);
-        }
-        
-        if (process.env.NODE_ENV !== 'production') {
-          if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
-            return callback(null, true);
-          }
-        }
-        
-        logger.warn(`CORS bloqueado para origin: ${origin}. Permitidas: ${allowedOrigins.join(', ')}`);
-        callback(new Error('Not allowed by CORS'));
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
