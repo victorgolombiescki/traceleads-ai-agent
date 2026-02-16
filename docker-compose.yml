@@ -58,15 +58,10 @@ services:
         - traefik.enable=true
         - traefik.docker.network=traefik-public
         - traefik.constraint-label=traefik-public
-        - traefik.http.middlewares.https-cors-traceai-ai-agent-backend.headers.accesscontrolallowmethods=GET,HEAD,OPTIONS,POST,PUT,PATCH,DELETE
-        - traefik.http.middlewares.https-cors-traceai-ai-agent-backend.headers.accesscontrolalloworiginlist=*
-        - traefik.http.middlewares.https-cors-traceai-ai-agent-backend.headers.accesscontrolallowheaders=*
-        - traefik.http.middlewares.https-cors-traceai-ai-agent-backend.headers.accesscontrolmaxage=100
         - traefik.http.routers.traceai-ai-agent-backend-http.rule=Host(`${AI_AGENT_TRAEFIK_URL}`)
-        - traefik.http.routers.traceai-ai-agent-backend-http.middlewares=https-redirect,https-cors-traceai-ai-agent-backend
+        - traefik.http.routers.traceai-ai-agent-backend-http.middlewares=https-redirect
         - traefik.http.routers.traceai-ai-agent-backend-http.entrypoints=http
         - traefik.http.routers.traceai-ai-agent-backend-https.rule=Host(`${AI_AGENT_TRAEFIK_URL}`)
-        - traefik.http.routers.traceai-ai-agent-backend-https.middlewares=https-cors-traceai-ai-agent-backend
         - traefik.http.routers.traceai-ai-agent-backend-https.entrypoints=https
         - traefik.http.routers.traceai-ai-agent-backend-https.tls=true
         - traefik.http.routers.traceai-ai-agent-backend-https.tls.certresolver=le

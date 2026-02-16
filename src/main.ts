@@ -12,26 +12,22 @@ async function bootstrap() {
         : ['log', 'error', 'warn'],
     });
     
-    const frontendUrl = process.env.FRONTEND_URL || 'https://app.traceleads.com.br';
-    const allowedOrigins = [frontendUrl, 'https://app.traceleads.com.br'].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicatas
+    const frontendUrl = 'https://app.traceleads.com.br';
+    const allowedOrigins = [frontendUrl, 'https://app.traceleads.com.br'].filter((v, i, a) => a.indexOf(v) === i);
     
     app.enableCors({
       origin: (origin, callback) => {
-        if (!origin) {
-          return callback(null, true);
-        }
-        
-        if (allowedOrigins.includes(origin)) {
+        if (origin) {
           return callback(null, origin);
         }
-        
-        callback(null, origin);
+        // Apenas quando não há origin (Postman, curl, etc), permitir
+        return callback(null, true);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-widget-token', 'x-internal-service-key'],
     });
-    logger.log(`CORS enabled for: ${allowedOrigins.join(', ')} (and all other origins)`);
+    logger.log(`CORS enabled - aceitando todas as origins com credentials`);
 
     app.useGlobalPipes(
       new ValidationPipe({
