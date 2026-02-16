@@ -12,15 +12,51 @@ async function bootstrap() {
         : ['log', 'error', 'warn'],
     });
     
-    // Enable CORS
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:7000';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://app.traceleads.com.br';
+    const allowedOrigins = frontendUrl.split(',').map(url => url.trim()).filter(Boolean);
+    
+    if (!allowedOrigins.includes('https://app.traceleads.com.br')) {
+      allowedOrigins.push('https://app.traceleads.com.br');
+    }
+    
     app.enableCors({
-      origin: frontendUrl,
+      origin: (origin, callback) => {
+        if (!origin) {
+          return callback(null, true);
+        }
+        
+        // Verificar se a origin está permitida (comparação exata ou por hostname)
+        const isAllowed = allowedOrigins.some(allowed => {
+          if (origin === allowed) return true;
+          // Comparar hostnames (ignorar protocolo e porta)
+          try {
+            const originUrl = new URL(origin);
+            const allowedUrl = new URL(allowed);
+            return originUrl.hostname === allowedUrl.hostname;
+          } catch {
+            return origin.startsWith(allowed);
+          }
+        });
+        
+        if (isAllowed) {
+          return callback(null, true);
+        }
+        
+        if (process.env.NODE_ENV !== 'production') {
+          if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+            return callback(null, true);
+          }
+        }
+        
+        logger.warn(`CORS bloqueado para origin: ${origin}. Permitidas: ${allowedOrigins.join(', ')}`);
+        callback(new Error('Not allowed by CORS'));
+      },
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-widget-token', 'x-internal-service-key'],
     });
-    logger.log(`CORS enabled for: ${frontendUrl}`);
+    logger.log(`CORS enabled for: ${allowedOrigins.join(', ')}`);
 
-    // Global validation pipe
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
