@@ -1,0 +1,55 @@
+import { NestFactory } from '@nestjs/core';
+import { ValidationPipe, Logger } from '@nestjs/common';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+  
+  try {
+    const app = await NestFactory.create(AppModule, {
+      logger: process.env.LOG_LEVEL === 'debug' 
+        ? ['log', 'error', 'warn', 'debug', 'verbose']
+        : ['log', 'error', 'warn'],
+    });
+    
+    // Enable CORS
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:7000';
+    app.enableCors({
+      origin: frontendUrl,
+      credentials: true,
+    });
+    logger.log(`CORS enabled for: ${frontendUrl}`);
+
+    // Global validation pipe
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+        transformOptions: {
+          enableImplicitConversion: true,
+        },
+      }),
+    );
+
+    const port = parseInt(process.env.PORT || '3001', 10);
+    await app.listen(port);
+    
+    logger.log(`🚀 Server running on http://localhost:${port}/`);
+    logger.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    
+    // Check required environment variables
+    if (!process.env.DB_USERNAME || !process.env.DB_PASSWORD || !process.env.DB_DATABASE) {
+      logger.warn('⚠️  DB_USERNAME, DB_PASSWORD, or DB_DATABASE not set - database connection may fail');
+    }
+    if (!process.env.OPENAI_API_KEY) {
+      logger.warn('⚠️  OPENAI_API_KEY not set - LLM features will not work');
+    }
+  } catch (error) {
+    logger.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+bootstrap();
+
