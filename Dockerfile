@@ -15,7 +15,7 @@ RUN npm run build && \
     echo "📋 Verificando arquivos gerados no build:" && \
     ls -la dist/ && \
     echo "📋 Verificando se main.js existe:" && \
-    test -f dist/main.js && echo "✅ dist/main.js encontrado" || (echo "❌ Erro: dist/main.js não foi gerado pelo build" && find dist -name "main.js" && exit 1)
+    test -f dist/src/main.js && echo "✅ dist/src/main.js encontrado" || (echo "❌ Erro: dist/src/main.js não foi gerado pelo build" && find dist -name "main.js" && exit 1)
 
 FROM node:20-alpine AS production
 
@@ -35,7 +35,7 @@ COPY --from=development /usr/src/app/dist ./dist
 
 RUN echo "📋 Verificando arquivos copiados:" && \
     ls -la dist/ && \
-    test -f dist/main.js && echo "✅ dist/main.js encontrado no stage de produção" || (echo "❌ Erro: dist/main.js não encontrado no stage de produção" && find dist -name "main.js" && exit 1)
+    test -f dist/src/main.js && echo "✅ dist/src/main.js encontrado no stage de produção" || (echo "❌ Erro: dist/src/main.js não encontrado no stage de produção" && find dist -name "main.js" && exit 1)
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
 
