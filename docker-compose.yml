@@ -20,7 +20,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-https://app.traceleads.com.br}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       INTERNAL_SERVICE_KEY: ${INTERNAL_SERVICE_KEY}
-      AI_AGENT_API_URL: ${AI_AGENT_API_URL:-http://localhost:3003}
+      AI_AGENT_API_URL: ${AI_AGENT_API_URL}
       TRACELEADS_API_URL: ${TRACELEADS_API_URL:-https://api.traceleads.com.br}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
