@@ -13,22 +13,25 @@ async function bootstrap() {
     });
     
     const frontendUrl = process.env.FRONTEND_URL || 'https://app.traceleads.com.br';
-    const allowedOrigins = [frontendUrl, 'https://app.traceleads.com.br'];
+    const allowedOrigins = [frontendUrl, 'https://app.traceleads.com.br'].filter((v, i, a) => a.indexOf(v) === i); // Remove duplicatas
     
     app.enableCors({
       origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          // Sempre permitir (mesmo padrão do traceleads-api)
-          callback(null, true);
+        if (!origin) {
+          return callback(null, true);
         }
+        
+        if (allowedOrigins.includes(origin)) {
+          return callback(null, origin);
+        }
+        
+        callback(null, origin);
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'x-widget-token', 'x-internal-service-key'],
     });
-    logger.log(`CORS enabled for: ${allowedOrigins.join(', ')}`);
+    logger.log(`CORS enabled for: ${allowedOrigins.join(', ')} (and all other origins)`);
 
     app.useGlobalPipes(
       new ValidationPipe({
