@@ -103,14 +103,14 @@ imagem() {
         return
     fi
 
-    if [ -z "$NODE_ENV_AI_AGENT" ]; then
-        echo "⚠️ Variável NODE_ENV_AI_AGENT não definida."
+    if [ -z "$NODE_ENV" ]; then
+        echo "⚠️ Variável NODE_ENV não definida."
         echo "Escolha o ambiente:"
         select env in production homolog; do
-            export NODE_ENV_AI_AGENT=$env
+            export NODE_ENV=$env
             break
         done
-        if [ -z "$NODE_ENV_AI_AGENT" ]; then
+        if [ -z "$NODE_ENV" ]; then
             echo "❌ Ambiente não selecionado. Cancelando..."
             sleep 1
             main
@@ -118,14 +118,14 @@ imagem() {
         fi
     fi
 
-    if [ "$NODE_ENV_AI_AGENT" != "production" ] && [ "$NODE_ENV_AI_AGENT" != "homolog" ]; then
-        echo "Erro: Ambiente inválido: $NODE_ENV_AI_AGENT. Use 'production' ou 'homolog'"
+    if [ "$NODE_ENV" != "production" ] && [ "$NODE_ENV" != "homolog" ]; then
+        echo "Erro: Ambiente inválido: $NODE_ENV. Use 'production' ou 'homolog'"
         sleep 1
         main
         return
     fi
 
-    if [ "$NODE_ENV_AI_AGENT" == "production" ]; then
+    if [ "$NODE_ENV" == "production" ]; then
         TAG_NAME="latest"
     else
         TAG_NAME="homolog"
@@ -133,7 +133,7 @@ imagem() {
 
     IMAGE_TAG="ghcr.io/victorgolombiescki/ai-agent-backend:${TAG_NAME}"
     
-    echo "🔧 Ambiente: $NODE_ENV_AI_AGENT"
+    echo "🔧 Ambiente: $NODE_ENV"
     echo "🏷️ Tag da imagem: $IMAGE_TAG"
     
     echo ""
@@ -185,7 +185,7 @@ imagem() {
     if [ -n "$USE_CACHE" ]; then
         BUILD_CMD="$BUILD_CMD $USE_CACHE"
     fi
-    BUILD_CMD="$BUILD_CMD --build-arg NODE_ENV=$NODE_ENV_AI_AGENT"
+    BUILD_CMD="$BUILD_CMD --build-arg NODE_ENV=$NODE_ENV"
     BUILD_CMD="$BUILD_CMD -t $IMAGE_TAG ."
     
     eval $BUILD_CMD
@@ -233,14 +233,14 @@ deploy() {
         return
     fi
 
-    if [ -z "$NODE_ENV_AI_AGENT" ]; then
-        echo "⚠️ Variável NODE_ENV_AI_AGENT não definida."
+    if [ -z "$NODE_ENV" ]; then
+        echo "⚠️ Variável NODE_ENV não definida."
         echo "Escolha o ambiente:"
         select env in production homolog; do
-            export NODE_ENV_AI_AGENT=$env
+            export NODE_ENV=$env
             break
         done
-        if [ -z "$NODE_ENV_AI_AGENT" ]; then
+        if [ -z "$NODE_ENV" ]; then
             echo "❌ Ambiente não selecionado. Cancelando..."
             sleep 1
             main
@@ -248,7 +248,7 @@ deploy() {
         fi
     fi
 
-    if [ "$NODE_ENV_AI_AGENT" == "production" ]; then
+    if [ "$NODE_ENV" == "production" ]; then
         export IMAGE_TAG="latest"
     else
         export IMAGE_TAG="homolog"
