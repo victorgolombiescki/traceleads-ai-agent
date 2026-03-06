@@ -185,18 +185,22 @@ export class CollectingPhoneStateHandler extends BaseStateHandler {
 
     console.log(`[CollectingPhone] Extracted phone via LLM: "${phone}" from message: "${userMessage}"`);
 
-    if (!phone || !isValidPhone(phone)) {
+    // Fallback: se o LLM não extraiu ou extraiu inválido, tentar extrair números diretamente
+    if (!phone || phone === "null" || !isValidPhone(phone)) {
       const numbersOnly = userMessage.replace(/\D/g, "");
-      console.log(`[CollectingPhone] LLM extraction failed, trying direct number extraction: "${numbersOnly}"`);
+      console.log(`[CollectingPhone] LLM extraction failed or invalid, trying direct number extraction: "${numbersOnly}" (length: ${numbersOnly.length})`);
       
-      if (numbersOnly.length >= 10 && numbersOnly.length <= 11) {
+      // Aceitar números com exatamente 10 ou 11 dígitos (DDD + 8 ou 9 dígitos)
+      if (numbersOnly.length === 10 || numbersOnly.length === 11) {
         phone = numbersOnly;
-        console.log(`[CollectingPhone] Using direct extraction: "${phone}"`);
+        console.log(`[CollectingPhone] ✅ Using direct extraction: "${phone}"`);
+      } else {
+        console.log(`[CollectingPhone] ❌ Direct extraction also failed: length ${numbersOnly.length} is not 10 or 11`);
       }
     }
     
-    if (phone && isValidPhone(phone)) {
-      console.log(`[CollectingPhone] Phone validated successfully: ${phone}`);
+    if (phone && phone !== "null" && isValidPhone(phone)) {
+      console.log(`[CollectingPhone] ✅ Phone validated successfully: ${phone}`);
       const formattedPhone = formatPhone(phone);
       const { customerName, customerEmail, leadId: existingLeadId } = conversation.context;
 

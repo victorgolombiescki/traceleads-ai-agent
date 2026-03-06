@@ -29,3 +29,4 @@ echo "   postgresql://usuario:senha@localhost:5432/ai_agents"
 echo ""
 
 
+
